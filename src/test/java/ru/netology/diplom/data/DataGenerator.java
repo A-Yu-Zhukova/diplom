@@ -17,14 +17,11 @@ public class DataGenerator {
         public static PaymentInfo generateByCard(String locale) {
             Faker faker = new Faker(new Locale("ru"));
             return new PaymentInfo(
-                    "111",
-                    "111",
-                    "111",
-                    "111",
+                    "4444 4444 4444 4441",
+                    "08",
+                    "22",
+                    faker.name().fullName(),
                     "111"
-                    //faker.name().fullName(),
-                   // faker.phoneNumber().phoneNumber(),
-                    //faker.address().cityName()
             );
         }
 
@@ -33,7 +30,7 @@ public class DataGenerator {
         }
 
         public static String getWrongCard() {
-            return "888888888888";
+            return "4444 4444 4444 1234";
         }
 
         public static String getEmptyCard() {
