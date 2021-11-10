@@ -10,11 +10,8 @@ import ru.netology.diplom.data.DataGenerator;
 
 import java.time.Duration;
 
-import static com.codeborne.selenide.Condition.cssClass;
-import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selenide.*;
 
 public class FormTestV1 {
     static PaymentInfo info;
@@ -54,9 +51,11 @@ public class FormTestV1 {
         form.$$(".input__inner input.input__control").get(3).setValue(owner);
         form.$$(".input__inner input.input__control").get(4).setValue(cvv);
         form.$("button").click();
-        form.$$(".input_type_text ").get(elementIndex).shouldHave(cssClass("input_invalid"));
-        SelenideElement inputInner = form.$$(".input__inner").get(elementIndex);
-        inputInner.$("span.input__sub").shouldHave(exactText(expected));
+        if (expected != "") {
+            form.$$(".input_type_text ").get(elementIndex).shouldHave(cssClass("input_invalid"));
+            SelenideElement inputInner = form.$$(".input__inner").get(elementIndex);
+            inputInner.$("span.input__sub").shouldHave(exactText(expected));
+        }
     }
 
     void testBadCard(String card, boolean useFirstButton) {
@@ -238,106 +237,58 @@ public class FormTestV1 {
     }
 
 
-
-    /*
     @Test
-    void testCorrect() {
-        String meetDate = DataGenerator.PaymentRequest.getMeetDate(3);
-        String expected = "Встреча успешно запланирована на " + meetDate;
-        SelenideElement form = $("form");
-        form.$("[data-test-id=city] input").setValue(info.getCity());
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.CONTROL + "A");
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.BACK_SPACE);
-        form.$("[data-test-id=date] input").setValue(meetDate);
-        form.$("[data-test-id=name] input").setValue(info.getName());
-        form.$("[data-test-id=phone] input").setValue(info.getPhone());
-        form.$("[data-test-id=agreement]").click();
-        form.$("button.button_view_extra").click();
+    void testApprovedCard() {
+        String expectedTitle = "Успешно";
+        String expectedContent = "Операция одобрена Банком.";
 
-        $("[data-test-id=success-notification]").shouldBe(visible, Duration.ofSeconds(15));
-        $("[data-test-id=success-notification] .notification__content").shouldHave(exactText(expected));
+        sendAndCheckForm(info.getCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", 0, true);
+
+        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
+        $$(".notification_visible .notification__title").get(0).shouldHave(exactText(expectedTitle));
+        $$(".notification_visible .notification__content").get(0).shouldHave(exactText(expectedContent));
+        $$(".notification_visible .notification__title").get(1).shouldBe(hidden);
     }
 
     @Test
-    void testReplan() {
-        String meetDate = DataGenerator.PaymentRequest.getMeetDate(3);
-        String expected = "Встреча успешно запланирована на " + meetDate;
-        SelenideElement form = $("form");
-        form.$("[data-test-id=city] input").setValue(info.getCity());
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.CONTROL + "A");
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.BACK_SPACE);
-        form.$("[data-test-id=date] input").setValue(meetDate);
-        form.$("[data-test-id=name] input").setValue(info.getName());
-        form.$("[data-test-id=phone] input").setValue(info.getPhone());
-        form.$("[data-test-id=agreement]").click();
-        form.$("button.button_view_extra").click();
+    void testApprovedCardCredit() {
+        String expectedTitle = "Успешно";
+        String expectedContent = "Операция одобрена Банком.";
 
-        $("[data-test-id=replan-notification]").shouldBe(visible, Duration.ofSeconds(15));
-        $("[data-test-id=replan-notification] button").click();
+        sendAndCheckForm(info.getCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", 0, false);
 
-        $("[data-test-id=success-notification]").shouldBe(visible, Duration.ofSeconds(15));
-        $("[data-test-id=success-notification] .notification__content").shouldHave(exactText(expected));
-    }*/
-/*
-    @Test
-    void testBadDate() {
-        String meetDate = DataGenerator.PaymentRequest.getMeetDate(1);
-        String expected = "Заказ на выбранную дату невозможен";
-        SelenideElement form = $("form");
-        form.$("[data-test-id=city] input").setValue(info.getCity());
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.CONTROL + "A");
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.BACK_SPACE);
-        form.$("[data-test-id=date] .input__control").setValue(meetDate);
-        form.$("[data-test-id=name] input").setValue(info.getName());
-        form.$("[data-test-id=phone] input").setValue(info.getPhone());
-        form.$("[data-test-id=agreement]").click();
-        form.$("button.button_view_extra").click();
-        $("[data-test-id=date] .input").shouldHave(cssClass("input_invalid"));
-        $("[data-test-id=date] .input_invalid .input__inner .input__sub").shouldHave(exactText(expected));
+        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
+        $$(".notification_visible .notification__title").get(0).shouldHave(exactText(expectedTitle));
+        $$(".notification_visible .notification__content").get(0).shouldHave(exactText(expectedContent));
+        $$(".notification_visible .notification__title").get(1).shouldBe(hidden);
     }
 
     @Test
-    void testBadName() {
-        String expected = "Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.";
-        SelenideElement form = $("form");
-        form.$("[data-test-id=city] input").setValue(info.getCity());
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.CONTROL + "A");
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.BACK_SPACE);
-        form.$("[data-test-id=date] input").setValue(DataGenerator.PaymentRequest.getMeetDate(3));
-        form.$("[data-test-id=phone] input").setValue(info.getPhone());
-        form.$("[data-test-id=name] input").setValue(DataGenerator.PaymentRequest.getBadName());
-        form.$("[data-test-id=agreement]").click();
-        form.$("button.button_view_extra").click();
-        $("[data-test-id=name]").shouldHave(cssClass("input_invalid"));
-        $("[data-test-id=name].input_invalid .input__inner .input__sub").shouldHave(exactText(expected));
+    void testRejectedCard() {
+        String expectedTitle = "Ошибка";
+        String expectedContent = "Ошибка! Банк отказал в проведении операции.";
+
+        sendAndCheckForm(DataGenerator.PaymentRequest.getRejectedCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", 0, true);
+
+        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
+        $$(".notification_visible .notification__title").get(1).shouldHave(exactText(expectedTitle));
+        $$(".notification_visible .notification__content").get(1).shouldHave(exactText(expectedContent));
     }
 
     @Test
-    void testBadAgreement() {
-        SelenideElement form = $("form");
-        form.$("[data-test-id=city] input").setValue(info.getCity());
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.CONTROL + "A");
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.BACK_SPACE);
-        form.$("[data-test-id=date] input").setValue(DataGenerator.PaymentRequest.getMeetDate(3));
-        form.$("[data-test-id=name] input").setValue(info.getName());
-        form.$("[data-test-id=phone] input").setValue(info.getPhone());
-        form.$("button.button_view_extra").click();
-        $("[data-test-id=agreement]").shouldHave(cssClass("input_invalid"));
+    void testRejectedCardCredit() {
+        String expectedTitle = "Ошибка";
+        String expectedContent = "Ошибка! Банк отказал в проведении операции.";
+
+        sendAndCheckForm(DataGenerator.PaymentRequest.getRejectedCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", 0, false);
+
+        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
+        $$(".notification_visible .notification__title").get(1).shouldHave(exactText(expectedTitle));
+        $$(".notification_visible .notification__content").get(1).shouldHave(exactText(expectedContent));
     }
 
-    @Test
-    void testBadPhone() {
-        String expected = "Поле обязательно для заполнения";
-        SelenideElement form = $("form");
-        form.$("[data-test-id=city] input").setValue(info.getCity());
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.CONTROL + "A");
-        form.$("[data-test-id=date] .input__control").sendKeys(Keys.BACK_SPACE);
-        form.$("[data-test-id=date] input").setValue(DataGenerator.PaymentRequest.getMeetDate(3));
-        form.$("[data-test-id=name] input").setValue(info.getName());
-        form.$("[data-test-id=phone] input").setValue(DataGenerator.PaymentRequest.getBadPhone());
-        form.$("[data-test-id=agreement]").click();
-        form.$("button.button_view_extra").click();
-        $("[data-test-id=phone]").shouldHave(cssClass("input_invalid"));
-        $("[data-test-id=phone].input_invalid .input__inner .input__sub").shouldHave(exactText(expected));
-    }*/
 }

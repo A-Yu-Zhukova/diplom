@@ -29,6 +29,10 @@ public class DataGenerator {
             return "123";
         }
 
+        public static String getRejectedCard() {
+            return "4444 4444 4444 4443";
+        }
+
         public static String getWrongCard() {
             return "4444 4444 4444 1234";
         }
