@@ -29,6 +29,9 @@ public class FormTestV1 {
     String getExpectedText(boolean isEmpty) {
         return isEmpty ? "Поле обязательно для заполнения" : "Неверный формат";
     }
+    String getDateExpectedText(boolean isEmpty) {
+        return isEmpty ? "Поле обязательно для заполнения" : "Неверно указан срок действия карты";
+    }
 
     void sendAndCheckForm(String card,
                           String month,
@@ -63,14 +66,14 @@ public class FormTestV1 {
                 getExpectedText(card.isEmpty()), 0, useFirstButton);
     }
 
-    void testBadMonth(String month, boolean useFirstButton) {
+    void testBadMonth(String month, boolean useFirstButton, boolean isInvalid) {
         sendAndCheckForm(info.getCard(), month, info.getYear(), info.getOwner(), info.getCvv(),
-                getExpectedText(month.isEmpty()), 1, useFirstButton);
+                (isInvalid ? getExpectedText(month.isEmpty()) : getDateExpectedText(month.isEmpty())), 1, useFirstButton);
     }
 
-    void testBadYear(String year, boolean useFirstButton) {
+    void testBadYear(String year, boolean useFirstButton, boolean isInvalid) {
         sendAndCheckForm(info.getCard(), info.getMonth(), year, info.getOwner(), info.getCvv(),
-                getExpectedText(year.isEmpty()), 2, useFirstButton);
+                (isInvalid ? getExpectedText(year.isEmpty()) : getDateExpectedText(year.isEmpty())), 2, useFirstButton);
     }
 
     void testBadOwner(String owner, boolean useFirstButton) {
@@ -79,8 +82,20 @@ public class FormTestV1 {
     }
 
     void testBadCvv(String cvv, boolean useFirstButton) {
-        sendAndCheckForm(info.getCard(), info.getMonth(), info.getCvv(), info.getOwner(), cvv,
+        sendAndCheckForm(info.getCard(), info.getMonth(), info.getYear(), info.getOwner(), cvv,
                 getExpectedText(cvv.isEmpty()), 4, useFirstButton);
+    }
+
+    void testInvalidCard(String card, boolean useFirstButton) {
+        String expectedTitle = "Ошибка";
+        String expectedContent = "Ошибка! Банк отказал в проведении операции.";
+
+        sendAndCheckForm(card, info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", 0, useFirstButton);
+
+        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
+        $$(".notification_visible .notification__title").get(1).shouldHave(exactText(expectedTitle));
+        $$(".notification_visible .notification__content").get(1).shouldHave(exactText(expectedContent));
     }
 
     @Test
@@ -90,7 +105,7 @@ public class FormTestV1 {
 
     @Test
     void testWrongCard() {
-        testBadCard(DataGenerator.PaymentRequest.getWrongCard(), true);
+        testInvalidCard(DataGenerator.PaymentRequest.getWrongCard(), true);
     }
 
     @Test
@@ -100,37 +115,37 @@ public class FormTestV1 {
 
     @Test
     void testOverflowMonth() {
-        testBadMonth(DataGenerator.PaymentRequest.getOverflowMonth(), true);
+        testBadMonth(DataGenerator.PaymentRequest.getOverflowMonth(), true, false);
     }
 
     @Test
     void testUnderflowMonth() {
-        testBadMonth(DataGenerator.PaymentRequest.getUnderflowMonth(), true);
+        testBadMonth(DataGenerator.PaymentRequest.getUnderflowMonth(), true, false);
     }
 
     @Test
     void testShortMonth() {
-        testBadMonth(DataGenerator.PaymentRequest.getShortMonth(), true);
+        testBadMonth(DataGenerator.PaymentRequest.getShortMonth(), true, true);
     }
 
     @Test
     void testEmptyMonth() {
-        testBadMonth(DataGenerator.PaymentRequest.getEmptyMonth(), true);
+        testBadMonth(DataGenerator.PaymentRequest.getEmptyMonth(), true, false);
     }
 
     @Test
     void testWrongYear() {
-        testBadYear(DataGenerator.PaymentRequest.getWrongYear(), true);
+        testBadYear(DataGenerator.PaymentRequest.getWrongYear(), true, false);
     }
 
     @Test
     void testShortYear() {
-        testBadYear(DataGenerator.PaymentRequest.getShortYear(), true);
+        testBadYear(DataGenerator.PaymentRequest.getShortYear(), true, true);
     }
 
     @Test
     void testEmptyYear() {
-        testBadYear(DataGenerator.PaymentRequest.getEmptyYear(), true);
+        testBadYear(DataGenerator.PaymentRequest.getEmptyYear(), true, false);
     }
 
     @Test
@@ -143,10 +158,10 @@ public class FormTestV1 {
         testBadOwner(DataGenerator.PaymentRequest.getEmptyOwner(), true);
     }
 
-    @Test
+    /* @Test
     void testWrongCvv() {
         testBadCvv(DataGenerator.PaymentRequest.getWrongCvv(), true);
-    }
+    }*/
 
     @Test
     void testShortCvv() {
@@ -168,7 +183,7 @@ public class FormTestV1 {
 
     @Test
     void testWrongCardCredit() {
-        testBadCard(DataGenerator.PaymentRequest.getWrongCard(), false);
+        testInvalidCard(DataGenerator.PaymentRequest.getWrongCard(), false);
     }
 
     @Test
@@ -178,37 +193,37 @@ public class FormTestV1 {
 
     @Test
     void testOverflowMonthCredit() {
-        testBadMonth(DataGenerator.PaymentRequest.getOverflowMonth(), false);
+        testBadMonth(DataGenerator.PaymentRequest.getOverflowMonth(), false, false);
     }
 
     @Test
     void testUnderflowMonthCredit() {
-        testBadMonth(DataGenerator.PaymentRequest.getUnderflowMonth(), false);
+        testBadMonth(DataGenerator.PaymentRequest.getUnderflowMonth(), false, false);
     }
 
     @Test
     void testShortMonthCredit() {
-        testBadMonth(DataGenerator.PaymentRequest.getShortMonth(), false);
+        testBadMonth(DataGenerator.PaymentRequest.getShortMonth(), false, true);
     }
 
     @Test
     void testEmptyMonthCredit() {
-        testBadMonth(DataGenerator.PaymentRequest.getEmptyMonth(), false);
+        testBadMonth(DataGenerator.PaymentRequest.getEmptyMonth(), false, false);
     }
 
     @Test
     void testWrongYearCredit() {
-        testBadYear(DataGenerator.PaymentRequest.getWrongYear(), false);
+        testBadYear(DataGenerator.PaymentRequest.getWrongYear(), false, false);
     }
 
     @Test
     void testShortYearCredit() {
-        testBadYear(DataGenerator.PaymentRequest.getShortYear(), false);
+        testBadYear(DataGenerator.PaymentRequest.getShortYear(), false, true);
     }
 
     @Test
     void testEmptyYearCredit() {
-        testBadYear(DataGenerator.PaymentRequest.getEmptyYear(), false);
+        testBadYear(DataGenerator.PaymentRequest.getEmptyYear(), false, false);
     }
 
     @Test
@@ -220,11 +235,11 @@ public class FormTestV1 {
     void testEmptyOwnerCredit() {
         testBadOwner(DataGenerator.PaymentRequest.getEmptyOwner(), false);
     }
-
+/*
     @Test
     void testWrongCvvCredit() {
         testBadCvv(DataGenerator.PaymentRequest.getWrongCvv(), false);
-    }
+    }*/
 
     @Test
     void testShortCvvCredit() {
@@ -267,28 +282,12 @@ public class FormTestV1 {
 
     @Test
     void testRejectedCard() {
-        String expectedTitle = "Ошибка";
-        String expectedContent = "Ошибка! Банк отказал в проведении операции.";
-
-        sendAndCheckForm(DataGenerator.PaymentRequest.getRejectedCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
-                "", 0, true);
-
-        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
-        $$(".notification_visible .notification__title").get(1).shouldHave(exactText(expectedTitle));
-        $$(".notification_visible .notification__content").get(1).shouldHave(exactText(expectedContent));
+        testInvalidCard(DataGenerator.PaymentRequest.getRejectedCard(), true);
     }
 
     @Test
     void testRejectedCardCredit() {
-        String expectedTitle = "Ошибка";
-        String expectedContent = "Ошибка! Банк отказал в проведении операции.";
-
-        sendAndCheckForm(DataGenerator.PaymentRequest.getRejectedCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
-                "", 0, false);
-
-        $(".notification").shouldBe(visible, Duration.ofSeconds(15));
-        $$(".notification_visible .notification__title").get(1).shouldHave(exactText(expectedTitle));
-        $$(".notification_visible .notification__content").get(1).shouldHave(exactText(expectedContent));
+        testInvalidCard(DataGenerator.PaymentRequest.getRejectedCard(), false);
     }
 
 }

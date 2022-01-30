@@ -30,7 +30,7 @@ public class DataGenerator {
         }
 
         public static String getRejectedCard() {
-            return "4444 4444 4444 4443";
+            return "4444 4444 4444 4442";
         }
 
         public static String getWrongCard() {
