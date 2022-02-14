@@ -1,5 +1,6 @@
 package ru.netology.diplom.test;
 
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import ru.netology.diplom.data.PaymentInfo;
 
@@ -47,6 +48,12 @@ public class FormTestUtils {
             form.$$(".input_type_text ").get(elementIndex).shouldHave(cssClass("input_invalid"));
             SelenideElement inputInner = form.$$(".input__inner").get(elementIndex);
             inputInner.$("span.input__sub").shouldHave(exactText(expected));
+        }
+        if (elementIndex == -1) {
+            ElementsCollection inputs = form.$$(".input_type_text ");
+            for (int i = 0; i < inputs.size(); i++) {
+                inputs.get(i).shouldNotHave(cssClass("input_invalid"));
+            }
         }
     }
 

@@ -230,4 +230,26 @@ public class FormTestV1 {
         utils.testInvalidCard(DataGenerator.PaymentRequest.getRejectedCard(), false);
     }
 
+
+    @Test
+    void testDoubleSendForm() {
+        utils.sendAndCheckForm(DataGenerator.PaymentRequest.getEmptyCard(),
+                DataGenerator.PaymentRequest.getEmptyMonth(),
+                DataGenerator.PaymentRequest.getEmptyYear(),
+                DataGenerator.PaymentRequest.getEmptyOwner(),
+                DataGenerator.PaymentRequest.getEmptyCvv(), "", 0, true);
+        utils.sendAndCheckForm(info.getCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", -1, true);
+    }
+
+    @Test
+    void testDoubleSendFormCredit() {
+        utils.sendAndCheckForm(DataGenerator.PaymentRequest.getEmptyCard(),
+                DataGenerator.PaymentRequest.getEmptyMonth(),
+                DataGenerator.PaymentRequest.getEmptyYear(),
+                DataGenerator.PaymentRequest.getEmptyOwner(),
+                DataGenerator.PaymentRequest.getEmptyCvv(), "", 0, false);
+        utils.sendAndCheckForm(info.getCard(), info.getMonth(), info.getYear(), info.getOwner(), info.getCvv(),
+                "", -1, false);
+    }
 }
