@@ -11,4 +11,6 @@
 - количество записей после выподнения тестов интерфейса
 - правильно заполненные связи между таблицами по id
 
+Allure report: https://github.com/A-Yu-Zhukova/diplom/blob/master/screenshots/allure.png
+
   
